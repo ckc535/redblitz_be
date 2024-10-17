@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ApiProperty } from '@nestjs/swagger';
 import { HydratedDocument } from 'mongoose';
 
 export type WalletDocument = HydratedDocument<Wallet>;
@@ -6,10 +7,11 @@ export type WalletDocument = HydratedDocument<Wallet>;
 @Schema()
 export class Wallet {
   @Prop()
-  id: string;
+  userId: string;
 
   @Prop()
-  address: number;
+  address: string;
+
 
   @Prop()
   private_key: string;
