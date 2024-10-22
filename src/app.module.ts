@@ -7,7 +7,7 @@ import { User } from './user/schemas/user.schema';
 import { UsersModule } from './user/user.module';
 
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://localhost:27017/'), WalletsModule, UsersModule],
+  imports: [MongooseModule.forRoot('mongodb+srv://ckc535:asd123456@redblitz.pbgcx.mongodb.net/'), WalletsModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 
 
 @Controller('users')
@@ -8,43 +8,50 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 export class UserController {
     constructor(private readonly userService: UserService) { }
     @Post('/create')
-    create(@Body() userAddress: string) {
-        const result = this.userService.createUser(userAddress);
+    async create(@Body() userAddress: string) {
+        const result = await this.userService.createUser(userAddress);
         return result;
     }
 
     @Post('/update')
-    update(@Body() userAddress: string) {
-        const result = this.userService.updateUser(userAddress);
+    async update(@Body() userAddress: string, point: number) {
+        const result = await this.userService.updateUser(userAddress,point);
         return result;
     }
 
-    @Get('/getUserPoints')
-    getUserPoints(@Param('userAddress') userAddress: string) {
-        const result = this.userService.getUserPoints(userAddress);
+    @Get('/getUserPoints/:userAddress')
+    @ApiParam({ name: 'userAddress', type: String })
+    async getUserPoints(@Param('userAddress') userAddress: string) {
+        console.log(userAddress)
+        const result = await this.userService.getUserPoints(userAddress);
         return result;
     }
 
     @Get('/getLeaderBoard')
-    getLeaderBoard() {
-        const result = this.userService.getLeaderBoard();
+    async getLeaderBoard() {
+        const result = await this.userService.getLeaderBoard();
         return result;
     }
 
-    @Get('/getUserPointOnchain')
-    getUserPointOnchain(@Param('userAddress') userAddress: string) {
+    @Get('/getUserPointOnchain/:userAddress')
+    @ApiParam({ name: 'userAddress', type: String })
+    async getUserPointOnchain(@Param('userAddress') userAddress: string) {
         try {
-            const result = this.userService.getUserPointOnchain(userAddress);
+            const result = await this.userService.getUserPointOnchain(userAddress);
             return result;
         }
         catch (error) {
             return new BadRequestException();
         }
     }
-    @Get('/getAllUserLife')
-    getAllUserLife(@Param('userAddress') userAddress: string) {
-        const freeLife = this.userService.getUserFreeLife(userAddress);
-        const life = this.userService.getUserLife(userAddress);
-        return { userAddress, freeLife, life }
+    @Get('/getAllUserLife/:userAddress')
+    @ApiParam({ name: 'userAddress', type: String })
+    async getAllUserLife(@Param('userAddress') userAddress: string) {
+        console.log(userAddress)
+        const freeLife = await this.userService.getUserFreeLife(userAddress);
+        const life = await this.userService.getUserLife(userAddress);
+        return { userAddress, freeLife:freeLife.freeLife, life:life, recoverTime: freeLife.timeRecover }
     }
+
+
 }

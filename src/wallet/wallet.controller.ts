@@ -3,7 +3,7 @@ import { WalletService } from './wallet.service';
 import { create } from 'domain';
 import { WalletDto } from './dto/create_wallet.dto';
 import { ImportWalletDto } from './dto/import_wallet.dto';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 
 
 @Controller('wallets')
@@ -16,6 +16,7 @@ export class WalletController {
   }
   @Post('/create')
   create(@Body() createWalletDto: WalletDto) {
+    console.log(createWalletDto)
     let { userId, password } = createWalletDto;
     const result = this.walletService.createWallet(userId, password);
     return result;
@@ -29,6 +30,7 @@ export class WalletController {
   }
 
   @Get(':id')
+  @ApiParam({ name: 'id', type: String })
   findUserWallet(@Param('id') userId: string) {
     return this.walletService.checkWallet(userId);
   }
