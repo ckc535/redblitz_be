@@ -61,7 +61,7 @@ export class UserController {
     @Post('/finishDailyMission')
     async finishDailyMission(@Body() data: FinishDailyMissionDto) {
         const { userAddress, missionName } = data;
-        const result = await this.userService.finishDailyMission(userAddress, MissionName.LOGIN);
+        const result = await this.userService.finishDailyMission(userAddress, missionName);
         return result;
     }
 
