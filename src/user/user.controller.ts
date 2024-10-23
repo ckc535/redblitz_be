@@ -1,6 +1,8 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { FinishDailyMissionDto } from './dto/finish-daily-mission.dto';
+import { MissionName } from 'src/mission/schemas/mission.schema';
 
 
 @Controller('users')
@@ -13,11 +15,12 @@ export class UserController {
         return result;
     }
 
-    @Post('/update')
-    async update(@Body() userAddress: string, point: number) {
-        const result = await this.userService.updateUser(userAddress,point);
+    @Post('/updateUser')
+    async update(@Body() userAddress: string, point: number,) {
+        const result = await this.userService.updateUser(userAddress, point);
         return result;
     }
+
 
     @Get('/getUserPoints/:userAddress')
     @ApiParam({ name: 'userAddress', type: String })
@@ -50,8 +53,14 @@ export class UserController {
         console.log(userAddress)
         const freeLife = await this.userService.getUserFreeLife(userAddress);
         const life = await this.userService.getUserLife(userAddress);
-        return { userAddress, freeLife:freeLife.freeLife, life:life, recoverTime: freeLife.timeRecover }
+        return { userAddress, freeLife: freeLife.freeLife, life: life, recoverTime: freeLife.timeRecover }
     }
 
+    @Post('/finishDailyMission')
+    async finishDailyMission(@Body() data: FinishDailyMissionDto) {
+        const { userAddress, missionName } = data;
+        const result = await this.userService.finishDailyMission(userAddress, MissionName.LOGIN);
+        return result;
+    }
 
 }

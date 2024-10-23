@@ -7,10 +7,13 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export class User {
-    @Prop()
+    @Prop({ required: true })
     userAddress: string;
 
-    @Prop()
+    @Prop({ default: 0 })
+    level: number
+
+    @Prop({ default: 0 })
     point: number;
 }
 

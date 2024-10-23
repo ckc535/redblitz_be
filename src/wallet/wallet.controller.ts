@@ -15,6 +15,7 @@ export class WalletController {
     return 'This action returns all user wallet';
   }
   @Post('/create')
+  @ApiBody({ type: WalletDto })
   create(@Body() createWalletDto: WalletDto) {
     console.log(createWalletDto)
     let { userId, password } = createWalletDto;
@@ -23,6 +24,7 @@ export class WalletController {
   }
 
   @Delete('/delete')
+  @ApiBody({ type: WalletDto })
   deleteWallet(@Body() data: WalletDto) {
     let { userId, password } = data;
     const result = this.walletService.deleteWallet(userId, password);
