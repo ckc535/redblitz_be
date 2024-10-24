@@ -130,7 +130,7 @@ export class UserService {
         });
         const wallet = await this.WalletModle.findOne({ address: userAddress });
         const checkPass = await this.WalletService.checkPassword(
-            wallet.userId,
+            wallet.user_id,
             password,
         );
         if (checkPass) {
@@ -147,11 +147,11 @@ export class UserService {
                         entrypoint: 'approve',
                         calldata: CallData.compile({
                             spender: process.env.CONTRACT_ADDRESS,
-                            amount:
+                            amount: cairo.uint256(
                                 amount *
                                 parseInt(
                                     ethers.parseEther(process.env.PRICE_PER_LIFE).toString(),
-                                ),
+                                )),
                         }),
                     },
                     {

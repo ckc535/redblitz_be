@@ -7,6 +7,7 @@ import { Wallet } from './schemas/wallet.schema';
 import * as bcrypt from 'bcrypt';
 import { WalletDataDto } from './dto/wallet_data.dto';
 import * as cryptoJS from 'crypto-js';
+import { ethers } from 'ethers';
 
 async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10;
@@ -26,7 +27,7 @@ export class WalletService {
 
   constructor(@InjectModel(Wallet.name) private walletModel: monngoose.Model<Wallet>) { }
 
-  async createWallet(userId: string, password: string) {
+  async createWallet(user_id: string, password: string) {
     const argentXaccountClassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
     // Generate public and private key pair.
@@ -46,15 +47,47 @@ export class WalletService {
       AXConstructorCallData,
       0
     );
-    // console.log(cryptoJS.AES.decrypt(pkEncrypt, password).toString(cryptoJS.enc.Utf8))
+    console.log(cryptoJS.AES.decrypt(pkEncrypt, password).toString(cryptoJS.enc.Utf8))
     password = await hashPassword(password);
-    const walletUser = await this.walletModel.create({ userId: userId, address: starkKeyPubAX, private_key: pkEncrypt, password: password });
+    const walletUser = await this.walletModel.create({ user_id: user_id, address: AXcontractAddress, private_key: pkEncrypt, password: password });
 
     return walletUser
   }
 
-  async checkWallet(userId: string) {
-    const wallet = await this.walletModel.findOne({ userId: userId });
+  async deployWallet(address: string, password: string) {
+    const provider = new RpcProvider({ nodeUrl: 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1' });
+    const user = await this.walletModel.findOne({ address: address });
+    const check = this.checkPassword(user.user_id, password)
+    if (!check) return new Error('Wrong Password')
+    const privateKey = await cryptoJS.AES.decrypt(user.private_key, password).toString(cryptoJS.enc.Utf8)
+    const starkKeyPub = ec.starkCurve.getStarkKey(privateKey)
+    const accountAX = new Account(provider, address, privateKey);
+    const argentXaccountClassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
+    const AXConstructorCallData = CallData.compile({
+      owner: starkKeyPub,
+      guardian: '0',
+    });
+    const AXcontractAddress = hash.calculateContractAddressFromHash(
+      starkKeyPub,
+      argentXaccountClassHash,
+      AXConstructorCallData,
+      0
+    );
+    const deployAccountPayload = {
+      classHash: argentXaccountClassHash,
+      constructorCalldata: AXConstructorCallData,
+      contractAddress: AXcontractAddress,
+      addressSalt: starkKeyPub,
+
+    };
+
+    const { transaction_hash: AXdAth, contract_address: AXcontractFinalAddress } =
+      await accountAX.deployAccount(deployAccountPayload, { maxFee: ethers.parseEther('0.001') });
+    console.log('✅ ArgentX wallet deployed at:', AXcontractFinalAddress);
+  }
+
+  async checkWallet(user_id: string) {
+    const wallet = await this.walletModel.findOne({ user_id: user_id });
     if (wallet) {
       return wallet;
     } else {
@@ -62,20 +95,20 @@ export class WalletService {
     }
   }
 
-  async checkPassword(userId: string, password: string) {
-    const wallet: WalletDataDto = await this.walletModel.findOne({ userId: userId });
+  async checkPassword(user_id: string, password: string) {
+    const wallet: WalletDataDto = await this.walletModel.findOne({ user_id: user_id });
     if (wallet) {
       const check = await bcrypt.compare(password, wallet.password)
       return check
     }
   }
 
-  async deleteWallet(userId: string, password: string) {
-    const wallet = await this.walletModel.findOne({ userId: userId });
+  async deleteWallet(user_id: string, password: string) {
+    const wallet = await this.walletModel.findOne({ user_id: user_id });
     if (wallet) {
-      const checkPass = await this.checkPassword(userId, password)
+      const checkPass = await this.checkPassword(user_id, password)
       if (checkPass) {
-        await this.walletModel.deleteOne({ userId: userId });
+        await this.walletModel.deleteOne({ user_id: user_id });
         return wallet;
       }
       else {
@@ -86,16 +119,16 @@ export class WalletService {
     }
   }
 
-  async importWallet(userId: string, privateKey: string, password: string) {
+  async importWallet(user_id: string, privateKey: string, password: string) {
     const pkEncrypt = cryptoJS.AES.encrypt(privateKey, password).toString()
     const starkKeyPub = ec.starkCurve.getStarkKey(privateKey);
     password = await hashPassword(password);
-    const walletUser = await this.walletModel.create({ userId: userId, address: starkKeyPub, private_key: pkEncrypt, password: password });
+    const walletUser = await this.walletModel.create({ user_id: user_id, address: starkKeyPub, private_key: pkEncrypt, password: password });
     return walletUser
   }
 
-  async getUserPoints(userId: string) {
-    const wallet = await this.walletModel.findOne({ userId: userId });
+  async getUserPoints(user_id: string) {
+    const wallet = await this.walletModel.findOne({ user_id: user_id });
     if (wallet) {
       const provider = new RpcProvider({ nodeUrl: 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1' });
       const contractAddress = ""

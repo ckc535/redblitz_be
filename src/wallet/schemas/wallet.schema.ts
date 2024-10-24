@@ -6,12 +6,14 @@ export type WalletDocument = HydratedDocument<Wallet>;
 
 @Schema()
 export class Wallet {
-  @Prop()
-  userId: string;
+  @Prop({ unique: true })
+  user_id: string;
 
-  @Prop()
+  @Prop({ unique: true })
   address: string;
 
+  @Prop({ unique: true })
+  user_name: string;
 
   @Prop()
   private_key: string;

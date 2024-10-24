@@ -4,6 +4,7 @@ import { create } from 'domain';
 import { WalletDto } from './dto/create_wallet.dto';
 import { ImportWalletDto } from './dto/import_wallet.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { DeployWalletDto } from './dto/deploy-wallet.dto';
 
 
 @Controller('wallets')
@@ -18,23 +19,32 @@ export class WalletController {
   @ApiBody({ type: WalletDto })
   create(@Body() createWalletDto: WalletDto) {
     console.log(createWalletDto)
-    let { userId, password } = createWalletDto;
-    const result = this.walletService.createWallet(userId, password);
+    let { user_id, password } = createWalletDto;
+    const result = this.walletService.createWallet(user_id, password);
+    return result;
+  }
+
+  @Post('deployWallet')
+  @ApiBody({ type: DeployWalletDto })
+  deployWallet(@Body() createWalletDto: DeployWalletDto) {
+    console.log(createWalletDto)
+    let { user_address, password } = createWalletDto;
+    const result = this.walletService.deployWallet(user_address, password);
     return result;
   }
 
   @Delete('/delete')
   @ApiBody({ type: WalletDto })
   deleteWallet(@Body() data: WalletDto) {
-    let { userId, password } = data;
-    const result = this.walletService.deleteWallet(userId, password);
+    let { user_id, password } = data;
+    const result = this.walletService.deleteWallet(user_id, password);
     return result;
   }
 
   @Get(':id')
   @ApiParam({ name: 'id', type: String })
-  findUserWallet(@Param('id') userId: string) {
-    return this.walletService.checkWallet(userId);
+  findUserWallet(@Param('id') user_id: string) {
+    return this.walletService.checkWallet(user_id);
   }
 
   @Post('checkPassword')
@@ -42,8 +52,8 @@ export class WalletController {
   checkPasswordCorrect(@Body() data: WalletDto) {
     try {
 
-      let { userId, password } = data;
-      const result = this.walletService.checkPassword(userId, password);
+      let { user_id, password } = data;
+      const result = this.walletService.checkPassword(user_id, password);
       return result;
     }
     catch (error) {
@@ -56,8 +66,8 @@ export class WalletController {
   importWallet(@Body() data: ImportWalletDto) {
     try {
 
-      let { userId, privateKey, password } = data;
-      const result = this.walletService.importWallet(userId, privateKey, password);
+      let { user_id, privateKey, password } = data;
+      const result = this.walletService.importWallet(user_id, privateKey, password);
       return result;
     }
     catch (error) {
