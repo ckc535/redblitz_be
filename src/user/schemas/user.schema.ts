@@ -8,9 +8,9 @@ export type UserDocument = HydratedDocument<User>;
 @Schema()
 export class User {
     @Prop({ required: true })
-    userAddress: string;
+    user_address: string;
 
-    @Prop({ default: 0 })
+    @Prop({ default: 1 })
     level: number
 
     @Prop({ default: 0 })

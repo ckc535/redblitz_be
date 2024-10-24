@@ -1,0 +1,1 @@
+create wallet -> deploy wallet -> get user point and life -> buy life -> get user life -> play game -> get user point and life -> finish daily mission -> get user point 

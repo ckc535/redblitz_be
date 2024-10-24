@@ -16,9 +16,9 @@ export class HistoryService {
     constructor(
         @InjectModel(History.name) private HistoryModel: monngoose.Model<History>,
     ) { }
-    async createHistory(userAddress: string, type: HistoryType, detail: object, point: number) {
+    async createHistory(user_address: string, type: HistoryType, detail: object, point: number) {
         const history = await this.HistoryModel.create({
-            userAddress,
+            user_address,
             type,
             detail,
             point,

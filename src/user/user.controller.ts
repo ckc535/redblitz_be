@@ -12,23 +12,23 @@ import { PlayGameDto } from './dto/play-game.dto';
 export class UserController {
     constructor(private readonly userService: UserService) { }
     @Post('/create')
-    async create(@Body() userAddress: string) {
-        const result = await this.userService.createUser(userAddress);
+    async create(@Body() user_address: string) {
+        const result = await this.userService.createUser(user_address);
         return result;
     }
 
     @Post('/updateUser')
-    async update(@Body() userAddress: string, point: number,) {
-        const result = await this.userService.updateUser(userAddress, point);
+    async update(@Body() user_address: string, point: number,) {
+        const result = await this.userService.updateUser(user_address, point);
         return result;
     }
 
 
-    @Get('/getUser/:userAddress')
-    @ApiParam({ name: 'userAddress', type: String })
-    async getUserPoints(@Param('userAddress') userAddress: string) {
-        console.log(userAddress)
-        const result = await this.userService.getUser(userAddress);
+    @Get('/getUser/:user_address')
+    @ApiParam({ name: 'user_address', type: String })
+    async getUserPoints(@Param('user_address') user_address: string) {
+        console.log(user_address)
+        const result = await this.userService.getUser(user_address);
         return result;
     }
 
@@ -38,46 +38,45 @@ export class UserController {
         return result;
     }
 
-    @Get('/getUserPointOnchain/:userAddress')
-    @ApiParam({ name: 'userAddress', type: String })
-    async getUserPointOnchain(@Param('userAddress') userAddress: string) {
+    @Get('/getUserPointOnchain/:user_address')
+    @ApiParam({ name: 'user_address', type: String })
+    async getUserPointOnchain(@Param('user_address') user_address: string) {
         try {
-            const result = await this.userService.getUserPointOnchain(userAddress);
+            const result = await this.userService.getUserPointOnchain(user_address);
             return result;
         }
         catch (error) {
             return new BadRequestException();
         }
     }
-    @Get('/getAllUserLife/:userAddress')
-    @ApiParam({ name: 'userAddress', type: String })
-    async getAllUserLife(@Param('userAddress') userAddress: string) {
-        console.log(userAddress)
-        const freeLife = await this.userService.getUserFreeLife(userAddress);
-        const life = await this.userService.getUserLife(userAddress);
-        return { userAddress, freeLife: freeLife.freeLife, life: life, recoverTime: freeLife.timeRecover }
+    @Get('/getAllUserLife/:user_address')
+    @ApiParam({ name: 'user_address', type: String })
+    async getAllUserLife(@Param('user_address') user_address: string) {
+        const freeLife = await this.userService.getUserFreeLife(user_address);
+        const life = await this.userService.getUserLife(user_address);
+        return { user_address, freeLife: freeLife.freeLife, life: life, recoverTime: freeLife.timeRecover }
     }
 
     @Post('/finishDailyMission')
     async finishDailyMission(@Body() data: FinishDailyMissionDto) {
-        const { userAddress, missionName } = data;
-        const result = await this.userService.finishDailyMission(userAddress, missionName);
+        const { user_address, missionName } = data;
+        const result = await this.userService.finishDailyMission(user_address, missionName);
         return result;
     }
 
     @Post('/buyLife')
     @ApiBody({ type: BuyLifeDto })
     async buyLife(@Body() data: BuyLifeDto) {
-        const { userAddress, password, amount } = data;
-        const result = await this.userService.buyLife(userAddress, password, amount);
+        const { user_address, password, amount } = data;
+        const result = await this.userService.buyLife(user_address, password, amount);
         return result;
     }
 
     @Post('/playGame')
-    @ApiBody({type: PlayGameDto})
+    @ApiBody({ type: PlayGameDto })
     async playGame(@Body() data: PlayGameDto) {
-        const { userAddress, level, success } = data;
-        const result = await this.userService.winLevel(userAddress, level, success);
+        const { user_address, level, success } = data;
+        const result = await this.userService.winLevel(user_address, level, success);
         return result;
     }
 

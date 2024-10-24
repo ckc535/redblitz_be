@@ -15,7 +15,7 @@ export enum HistoryType {
 @Schema({ timestamps: true })
 export class History {
     @Prop({ type: String, required: true })
-    userAddress: string;
+    user_address: string;
 
     @Prop({ type: String })
     type: HistoryType

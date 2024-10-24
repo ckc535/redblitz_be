@@ -9,9 +9,9 @@ import { CreateMissionDto } from './dto/create-mission.dto';
 @ApiTags('missions')
 export class MissionController {
     constructor(private readonly userService: MissionService) { }
-    @Post('/createUserMission/:userAddress')
-    async createPerUserMission(@Param('userAddress') userAddress: string) {
-        const result = await this.userService.createUserMission(userAddress);
+    @Post('/createUserMission/:user_address')
+    async createPerUserMission(@Param('user_address') user_address: string) {
+        const result = await this.userService.createUserMission(user_address);
         return result;
     }
 
@@ -29,10 +29,10 @@ export class MissionController {
         return result;
     }
 
-    @Get('/findAllUserMissions/:userAddress')
-    @ApiParam({ name: 'userAddress', type: String })
-    async findAllUserMissions(@Param('userAddress') userAddress: string) {
-        const result = await this.userService.findAllUserMissions(userAddress);
+    @Get('/findAllUserMissions/:user_address')
+    @ApiParam({ name: 'user_address', type: String })
+    async findAllUserMissions(@Param('user_address') user_address: string) {
+        const result = await this.userService.findAllUserMissions(user_address);
         return result;
     }
 }

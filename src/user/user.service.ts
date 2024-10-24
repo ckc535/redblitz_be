@@ -18,8 +18,7 @@ import { HistoryService } from 'src/history/history.service';
 import { HistoryType } from 'src/history/schemas/history.schema';
 import { Mission, MissionName } from 'src/mission/schemas/mission.schema';
 import { MissionService } from 'src/mission/mission.service';
-import { error } from 'console';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { console } from 'inspector';
 
 dotenv.config();
 
@@ -33,16 +32,16 @@ export class UserService {
         private readonly MissionService: MissionService,
     ) { }
 
-    async createUser(userAddress: string) {
+    async createUser(user_address: string) {
         const user = await this.userModel.create({
-            userAddress: userAddress,
+            user_address: user_address,
             point: 0,
         });
         return user;
     }
 
-    async updateUser(userAddress: string, point: number) {
-        const user = await this.userModel.findOne({ userAddress: userAddress });
+    async updateUser(user_address: string, point: number) {
+        const user = await this.userModel.findOne({ user_address: user_address });
         if (user) {
             user.point = user.point + point;
             await user.save();
@@ -52,8 +51,8 @@ export class UserService {
         }
     }
 
-    async getUser(userAddress: string) {
-        const user = await this.userModel.findOne({ userAddress: userAddress });
+    async getUser(user_address: string) {
+        const user = await this.userModel.findOne({ user_address: user_address });
         if (user) {
             return user;
         } else {
@@ -67,23 +66,22 @@ export class UserService {
         return users;
     }
 
-    async getUserPointOnchain(userAddress: string) {
+    async getUserPointOnchain(user_address: string) {
         const provider = new RpcProvider({
             nodeUrl:
                 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1',
         });
-        const testAddress =
-            '0x07ab9cf5c0d37da685e7432d156310c76fcb7cb640844763496bf8b78de2bfa7';
+        const testAddress = process.env.CONTRACT_ADDRESS
         const { abi: testAbi } = await provider.getClassAt(testAddress);
         if (testAbi === undefined) {
             throw new Error('Abi not found');
         }
         const myTestContract = new Contract(testAbi, testAddress, provider);
-        const point = await myTestContract.getPoint(userAddress);
-        return { userAddress: userAddress, point: parseInt(point.toString()) };
+        const point = await myTestContract.getPoint(user_address);
+        return { user_address: user_address, point: parseInt(point.toString()) };
     }
 
-    async getUserLife(userAddress: string) {
+    async getUserLife(user_address: string) {
         const provider = new RpcProvider({
             nodeUrl:
                 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1',
@@ -94,11 +92,12 @@ export class UserService {
             throw new Error('Abi not found');
         }
         const myTestContract = new Contract(testAbi, testAddress, provider);
-        const point = await myTestContract.getLife(userAddress);
+        const point = await myTestContract.getLife(user_address);
         return parseInt(point.toString());
     }
 
-    async getUserFreeLife(userAddress: string) {
+    async getUserFreeLife(user_address: string) {
+        console.log("aa")
         const provider = new RpcProvider({
             nodeUrl:
                 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1',
@@ -108,30 +107,27 @@ export class UserService {
         if (testAbi === undefined) {
             throw new Error('Abi not found');
         }
+        console.log("asdasdsadsa")
         const myTestContract = new Contract(testAbi, testAddress, provider);
-        const time = await myTestContract.getTimeRecoverFreeLife(userAddress);
-        let freeLife = Math.floor((Date.now() - parseInt(time.toString())) / 3600);
+        const time = await myTestContract.getTimeRecoverFreeLife(user_address);
+        let freeLife = Math.floor((Math.floor(Date.now() / 1000) - parseInt(time.toString())) / 3600);
         if (freeLife > 5) {
             freeLife = 5;
         }
-        console.log({
-            userAddress: userAddress,
-            timeRecover: time.toString(),
-            freeLife: freeLife.toString(),
-        });
+        const timeRecover = 3600 - ((Math.floor(Date.now() / 1000) - parseInt(time.toString())) % 3600)
         return {
-            userAddress: userAddress,
-            timeRecover: time.toString(),
+            user_address: user_address,
+            timeRecover: timeRecover,
             freeLife: freeLife.toString(),
         };
     }
 
-    async buyLife(userAddress: string, password: string, amount: number) {
+    async buyLife(user_address: string, password: string, amount: number) {
         const provider = new RpcProvider({
             nodeUrl:
                 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1',
         });
-        const wallet = await this.WalletModle.findOne({ address: userAddress });
+        const wallet = await this.WalletModle.findOne({ address: user_address });
         const checkPass = await this.WalletService.checkPassword(
             wallet.user_id,
             password,
@@ -159,21 +155,21 @@ export class UserService {
                     },
                     {
                         contractAddress: process.env.CONTRACT_ADDRESS,
-                        entrypoint: 'buyLife',
+                        entrypoint: 'giveLife',
                         calldata: CallData.compile({
-                            userAddress: userAddress,
-                            amount: cairo.uint256(amount),
+                            amount: amount,
                         }),
                     },
                 ],
                 undefined,
-                { maxFee: ethers.parseEther('0.01') },
+                { maxFee: ethers.parseEther('0.005') },
             );
             const txR = await provider.waitForTransaction(tx.transaction_hash);
             if (txR.isSuccess()) {
-                await this.HistoryService.createHistory(userAddress, HistoryType.BuyLife, { ticketAmount: amount }, 0);
+                await this.HistoryService.createHistory(user_address, HistoryType.BuyLife, { ticketAmount: amount }, 0);
                 return { transactionStatus: true, amount: amount };
             } else {
+                console.log("buy faild")
                 return new Error('Buy Failed!');
             }
         } else {
@@ -181,7 +177,7 @@ export class UserService {
         }
     }
 
-    async winLevel(userAddress: string, level: number, success: boolean) {
+    async winLevel(user_address: string, level: number, success: number) {
         const provider = new RpcProvider({
             nodeUrl:
                 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1',
@@ -194,9 +190,9 @@ export class UserService {
                     entrypoint: 'winLevel',
                     calldata: CallData.compile(
                         {
-                            userAddress: userAddress,
+                            user: user_address,
                             level: level,
-                            success: success,
+                            success: 1,
                         }
                     ),
                 },
@@ -205,45 +201,51 @@ export class UserService {
         const txR = await provider.waitForTransaction(tx.transaction_hash);
         if (txR.isSuccess()) {
             if (success) {
-                await this.HistoryService.createHistory(userAddress, HistoryType.PlayWin, { level }, 100);
-                const user = await this.userModel.findOne({ address: userAddress });
+                const user = await this.userModel.findOne({ user_address: user_address });
+
                 if (user.level == level) {
                     user.level = level + 1;
                     user.point = user.point + 100;
                     await user.save();
+                    await this.HistoryService.createHistory(user_address, HistoryType.PlayWin, { level }, 100);
+                }
+                else {
+                    await this.HistoryService.createHistory(user_address, HistoryType.PlayWin, { level }, 0);
                 }
             }
             else {
-                await this.HistoryService.createHistory(userAddress, HistoryType.PlayLose, { level }, 0);
+                await this.HistoryService.createHistory(user_address, HistoryType.PlayLose, { level }, 0);
             }
+        }
+        else {
+            console.log("fail")
         }
     }
 
-    async finishDailyMission(userAddress: string, missionName: MissionName) {
+    async finishDailyMission(user_address: string, missionName: MissionName) {
         const provider = new RpcProvider({
             nodeUrl:
                 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1',
         });
         const account = new Account(provider, process.env.ADMIN_ADDRESS, process.env.ADMIN_PK);
-        const mission = await this.MissionService.findUserMission(userAddress, missionName, new Date().getDay());
-        if (new Date().getDay() != mission.day) {
-            const tx = await account.execute(
-                [
-                    {
-                        contractAddress: process.env.CONTRACT_ADDRESS,
-                        entrypoint: 'rewardMission',
-                        calldata: CallData.compile({
-                            userAddress: userAddress,
-                            point: cairo.uint256(mission.mission_reward),
-                        })
-                    }
-                ], undefined, { maxFee: ethers.parseEther('0.01') }
-            )
-            const txR = await provider.waitForTransaction(tx.transaction_hash);
-            if (txR.isSuccess()) {
-                await this.MissionService.finishUserMission(userAddress, mission.mission_name, new Date().getDay());
-                await this.HistoryService.createHistory(userAddress, HistoryType.RewardMission, { mission_id: mission.mission_id, mission_name: mission.mission_name }, mission.mission_reward);
-            }
+        const mission = await this.MissionService.findUserMission(user_address, missionName, new Date().getDay());
+        const tx = await account.execute(
+            [
+                {
+                    contractAddress: process.env.CONTRACT_ADDRESS,
+                    entrypoint: 'rewardMission',
+                    calldata: CallData.compile({
+                        user_address: user_address,
+                        point: mission.mission_reward,
+                    })
+                }
+            ], undefined, { maxFee: ethers.parseEther('0.01') }
+        )
+        const txR = await provider.waitForTransaction(tx.transaction_hash);
+        if (txR.isSuccess()) {
+            await this.MissionService.finishUserMission(user_address, mission.mission_name, new Date().getDay());
+            await this.HistoryService.createHistory(user_address, HistoryType.RewardMission, { mission_id: mission.mission_id, mission_name: mission.mission_name }, mission.mission_reward);
+
         }
 
     }

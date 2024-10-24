@@ -22,13 +22,13 @@ export class MissionService {
         @InjectModel(Wallet.name) private WalletModel: monngoose.Model<Wallet>,
     ) { }
 
-    async createUserMission(userAddress: string) {
+    async createUserMission(user_address: string) {
         const mission = await this.MissionModel.find();
         mission.map(async (mission) => {
             console.log(mission.mission_day)
             mission.mission_day.map(async (day) => {
                 const userMission = this.UserMissionModel.create({
-                    user_address: userAddress,
+                    user_address: user_address,
                     mission_id: mission._id,
                     mission_name: mission.mission_name,
                     mission_reward: mission.mission_reward,
@@ -54,21 +54,21 @@ export class MissionService {
         return mission;
     }
 
-    async findUserMission(userAddress: string, missionName: MissionName, day: number) {
-        const mission = await this.UserMissionModel.findOne({ user_address: userAddress, mission_name: missionName, day: day });
+    async findUserMission(user_address: string, missionName: MissionName, day: number) {
+        const mission = await this.UserMissionModel.findOne({ user_address: user_address, mission_name: missionName, day: day });
         return mission;
     }
 
-    async findAllUserMissions(userAddress: string) {
-        const missions = await this.UserMissionModel.find({ user_address: userAddress });
+    async findAllUserMissions(user_address: string) {
+        const missions = await this.UserMissionModel.find({ user_address: user_address });
         let missionList = {}
-        
+
         missions.map(mission => {
-            if (!missionList[mission.day]){
+            if (!missionList[mission.day]) {
                 missionList[mission.day] = []
                 missionList[mission.day].push(mission)
             }
-            else{
+            else {
                 missionList[mission.day].push(mission)
             }
         })
@@ -76,14 +76,14 @@ export class MissionService {
         return missionList
     }
 
-    async finishUserMission(userAddress: string, missionName: MissionName, day: number) {
+    async finishUserMission(user_address: string, missionName: MissionName, day: number) {
         if (day != new Date().getDay()) {
             return new Error('Wrong day')
         }
-        const mission = await this.UserMissionModel.findOne({ user_address: userAddress, mission_name: missionName, day: day });
+        const mission = await this.UserMissionModel.findOne({ user_address: user_address, mission_name: missionName, day: day });
         console.log('success')
         if (mission) {
-            await this.UserMissionModel.updateOne({ user_address: userAddress, mission_name: missionName, day: day }, { status: UserMissionStatus.Success })
+            await this.UserMissionModel.updateOne({ user_address: user_address, mission_name: missionName, day: day }, { status: UserMissionStatus.Success })
             return { success: true }
         }
         else {
