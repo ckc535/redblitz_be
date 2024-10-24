@@ -24,11 +24,11 @@ export class UserController {
     }
 
 
-    @Get('/getUserPoints/:userAddress')
+    @Get('/getUser/:userAddress')
     @ApiParam({ name: 'userAddress', type: String })
     async getUserPoints(@Param('userAddress') userAddress: string) {
         console.log(userAddress)
-        const result = await this.userService.getUserPoints(userAddress);
+        const result = await this.userService.getUser(userAddress);
         return result;
     }
 
