@@ -18,6 +18,8 @@ import { HistoryService } from 'src/history/history.service';
 import { HistoryType } from 'src/history/schemas/history.schema';
 import { Mission, MissionName } from 'src/mission/schemas/mission.schema';
 import { MissionService } from 'src/mission/mission.service';
+import { error } from 'console';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 dotenv.config();
 
@@ -50,11 +52,12 @@ export class UserService {
         }
     }
 
-    async getUserPoints(userAddress: string) {
+    async getUser(userAddress: string) {
         const user = await this.userModel.findOne({ userAddress: userAddress });
         if (user) {
-            return user.point;
+            return user;
         } else {
+            console.log(new Error('User not found'))
             return new Error('User not found');
         }
     }
@@ -203,6 +206,12 @@ export class UserService {
         if (txR.isSuccess()) {
             if (success) {
                 await this.HistoryService.createHistory(userAddress, HistoryType.PlayWin, { level }, 100);
+                const user = await this.userModel.findOne({ address: userAddress });
+                if (user.level == level) {
+                    user.level = level + 1;
+                    user.point = user.point + 100;
+                    await user.save();
+                }
             }
             else {
                 await this.HistoryService.createHistory(userAddress, HistoryType.PlayLose, { level }, 0);

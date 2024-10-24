@@ -1,8 +1,10 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOAuth2, ApiParam, ApiTags } from '@nestjs/swagger';
 import { FinishDailyMissionDto } from './dto/finish-daily-mission.dto';
 import { MissionName } from 'src/mission/schemas/mission.schema';
+import { BuyLifeDto } from './dto/buy-life.dto';
+import { PlayGameDto } from './dto/play-game.dto';
 
 
 @Controller('users')
@@ -22,11 +24,11 @@ export class UserController {
     }
 
 
-    @Get('/getUserPoints/:userAddress')
+    @Get('/getUser/:userAddress')
     @ApiParam({ name: 'userAddress', type: String })
     async getUserPoints(@Param('userAddress') userAddress: string) {
         console.log(userAddress)
-        const result = await this.userService.getUserPoints(userAddress);
+        const result = await this.userService.getUser(userAddress);
         return result;
     }
 
@@ -59,7 +61,23 @@ export class UserController {
     @Post('/finishDailyMission')
     async finishDailyMission(@Body() data: FinishDailyMissionDto) {
         const { userAddress, missionName } = data;
-        const result = await this.userService.finishDailyMission(userAddress, MissionName.LOGIN);
+        const result = await this.userService.finishDailyMission(userAddress, missionName);
+        return result;
+    }
+
+    @Post('/buyLife')
+    @ApiBody({ type: BuyLifeDto })
+    async buyLife(@Body() data: BuyLifeDto) {
+        const { userAddress, password, amount } = data;
+        const result = await this.userService.buyLife(userAddress, password, amount);
+        return result;
+    }
+
+    @Post('/playGame')
+    @ApiBody({type: PlayGameDto})
+    async playGame(@Body() data: PlayGameDto) {
+        const { userAddress, level, success } = data;
+        const result = await this.userService.winLevel(userAddress, level, success);
         return result;
     }
 

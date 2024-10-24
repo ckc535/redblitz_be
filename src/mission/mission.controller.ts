@@ -28,4 +28,11 @@ export class MissionController {
         const result = await this.userService.createMission(mission_name, mission_reward, mission_description, mission_day);
         return result;
     }
+
+    @Get('/findAllUserMissions/:userAddress')
+    @ApiParam({ name: 'userAddress', type: String })
+    async findAllUserMissions(@Param('userAddress') userAddress: string) {
+        const result = await this.userService.findAllUserMissions(userAddress);
+        return result;
+    }
 }

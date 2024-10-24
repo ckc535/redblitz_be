@@ -59,6 +59,23 @@ export class MissionService {
         return mission;
     }
 
+    async findAllUserMissions(userAddress: string) {
+        const missions = await this.UserMissionModel.find({ user_address: userAddress });
+        let missionList = {}
+        
+        missions.map(mission => {
+            if (!missionList[mission.day]){
+                missionList[mission.day] = []
+                missionList[mission.day].push(mission)
+            }
+            else{
+                missionList[mission.day].push(mission)
+            }
+        })
+        console.log(missionList)
+        return missionList
+    }
+
     async finishUserMission(userAddress: string, missionName: MissionName, day: number) {
         if (day != new Date().getDay()) {
             return new Error('Wrong day')
