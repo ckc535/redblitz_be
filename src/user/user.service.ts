@@ -28,7 +28,6 @@ export class UserService {
     constructor(
         @InjectModel(User.name) private userModel: monngoose.Model<User>,
         @InjectModel(Wallet.name) private WalletModle: monngoose.Model<Wallet>,
-        eventEmitter: EventEmitter2,
         private readonly HistoryService: HistoryService,
         private readonly WalletService: WalletService,
         private readonly MissionService: MissionService,
