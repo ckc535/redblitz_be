@@ -32,9 +32,11 @@ export class UserController {
         return result;
     }
 
-    @Get('/getLeaderBoard')
-    async getLeaderBoard() {
-        const result = await this.userService.getLeaderBoard();
+    @Get('/getLeaderBoard/:user_address')
+    @ApiParam({ name: 'user_address', type: String })
+    async getLeaderBoard(@Param('user_address') user_address: string) {
+        console.log(user_address)
+        const result = await this.userService.getLeaderBoard(user_address);
         return result;
     }
 

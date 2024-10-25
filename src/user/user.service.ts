@@ -53,17 +53,53 @@ export class UserService {
 
     async getUser(user_address: string) {
         const user = await this.userModel.findOne({ user_address: user_address });
-        if (user) {
-            return user;
+        const userWallet = await this.WalletModle.findOne({ address: user_address });
+        if (user && userWallet) {
+            return { user_address:user.user_address, level: user.level, point: user.point, user_name: userWallet.user_name };
         } else {
             console.log(new Error('User not found'))
             return new Error('User not found');
         }
     }
 
-    async getLeaderBoard() {
-        const users = await this.userModel.find().sort({ point: -1 }).limit(10);
-        return users;
+    async getLeaderBoard(user_address:string) {
+        const users = await this.userModel.aggregate([
+            // Step 2: Sort by points in descending order
+            { $sort: { point: -1 } },
+            // Step 3: Add a rank field
+            {
+              $group: {
+                _id: null,
+                users: {
+                  $push: {
+                    user_address: "$user_address",
+                    point: "$point",
+                  },
+                },
+              },
+            },
+            {
+              $project: {
+                users: {
+                  $map: {
+                    input: { $range: [0, { $size: "$users" }] },
+                    as: "index",
+                    in: {
+                      rank: { $add: ["$$index", 1] }, // rank starts at 1
+                      user_address: { $arrayElemAt: ["$users.user_address", "$$index"] },
+                      point: { $arrayElemAt: ["$users.point", "$$index"] },
+                    },
+                  },
+                },
+              },
+            },
+            { $unwind: "$users" },
+            {
+              $replaceRoot: { newRoot: "$users" },
+            },
+          ])
+          const userRank = users.find(u => u.user_address === user_address);
+        return {leaderboard: users, userRank: userRank};
     }
 
     async getUserPointOnchain(user_address: string) {
