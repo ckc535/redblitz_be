@@ -97,7 +97,6 @@ export class UserService {
     }
 
     async getUserFreeLife(user_address: string) {
-        console.log("aa")
         const provider = new RpcProvider({
             nodeUrl:
                 'https://starknet-sepolia.g.alchemy.com/v2/UpFQNJm0afOTPm3uDV0vyrMSJxA88Ws1',
@@ -107,7 +106,6 @@ export class UserService {
         if (testAbi === undefined) {
             throw new Error('Abi not found');
         }
-        console.log("asdasdsadsa")
         const myTestContract = new Contract(testAbi, testAddress, provider);
         const time = await myTestContract.getTimeRecoverFreeLife(user_address);
         let freeLife = Math.floor((Math.floor(Date.now() / 1000) - parseInt(time.toString())) / 3600);
@@ -169,7 +167,6 @@ export class UserService {
                 await this.HistoryService.createHistory(user_address, HistoryType.BuyLife, { ticketAmount: amount }, 0);
                 return { transactionStatus: true, amount: amount };
             } else {
-                console.log("buy faild")
                 return new Error('Buy Failed!');
             }
         } else {
@@ -218,7 +215,7 @@ export class UserService {
             }
         }
         else {
-            console.log("fail")
+            return new Error('Fail')
         }
     }
 

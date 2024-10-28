@@ -5,4 +5,6 @@ export class WalletDto {
     user_id: string;
     @ApiProperty({ example: '123456' })
     password: string;
+    @ApiProperty({ example: 'ckcne' })
+    user_name: string;
 }

@@ -18,16 +18,14 @@ export class WalletController {
   @Post('/create')
   @ApiBody({ type: WalletDto })
   create(@Body() createWalletDto: WalletDto) {
-    console.log(createWalletDto)
-    let { user_id, password } = createWalletDto;
-    const result = this.walletService.createWallet(user_id, password);
+    let { user_id, password, user_name } = createWalletDto;
+    const result = this.walletService.createWallet(user_id, password, user_name);
     return result;
   }
 
   @Post('deployWallet')
   @ApiBody({ type: DeployWalletDto })
   deployWallet(@Body() createWalletDto: DeployWalletDto) {
-    console.log(createWalletDto)
     let { user_address, password } = createWalletDto;
     const result = this.walletService.deployWallet(user_address, password);
     return result;

@@ -25,7 +25,6 @@ export class MissionService {
     async createUserMission(user_address: string) {
         const mission = await this.MissionModel.find();
         mission.map(async (mission) => {
-            console.log(mission.mission_day)
             mission.mission_day.map(async (day) => {
                 const userMission = this.UserMissionModel.create({
                     user_address: user_address,
@@ -72,7 +71,6 @@ export class MissionService {
                 missionList[mission.day].push(mission)
             }
         })
-        console.log(missionList)
         return missionList
     }
 
@@ -81,7 +79,6 @@ export class MissionService {
             return new Error('Wrong day')
         }
         const mission = await this.UserMissionModel.findOne({ user_address: user_address, mission_name: missionName, day: day });
-        console.log('success')
         if (mission) {
             await this.UserMissionModel.updateOne({ user_address: user_address, mission_name: missionName, day: day }, { status: UserMissionStatus.Success })
             return { success: true }

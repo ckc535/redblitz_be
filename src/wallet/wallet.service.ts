@@ -27,12 +27,11 @@ export class WalletService {
 
   constructor(@InjectModel(Wallet.name) private walletModel: monngoose.Model<Wallet>) { }
 
-  async createWallet(user_id: string, password: string) {
+  async createWallet(user_id: string, password: string, user_name: string) {
     const argentXaccountClassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
     // Generate public and private key pair.
     const privateKeyAX = stark.randomAddress();
-    console.log(privateKeyAX)
     const pkEncrypt = cryptoJS.AES.encrypt(privateKeyAX, password).toString()
     const starkKeyPubAX = ec.starkCurve.getStarkKey(privateKeyAX);
 
@@ -47,9 +46,8 @@ export class WalletService {
       AXConstructorCallData,
       0
     );
-    console.log(cryptoJS.AES.decrypt(pkEncrypt, password).toString(cryptoJS.enc.Utf8))
     password = await hashPassword(password);
-    const walletUser = await this.walletModel.create({ user_id: user_id, address: AXcontractAddress, private_key: pkEncrypt, password: password });
+    const walletUser = await this.walletModel.create({ user_id: user_id, address: AXcontractAddress, private_key: pkEncrypt, password: password, user_name: user_name });
 
     return walletUser
   }
@@ -83,7 +81,6 @@ export class WalletService {
 
     const { transaction_hash: AXdAth, contract_address: AXcontractFinalAddress } =
       await accountAX.deployAccount(deployAccountPayload, { maxFee: ethers.parseEther('0.001') });
-    console.log('✅ ArgentX wallet deployed at:', AXcontractFinalAddress);
   }
 
   async checkWallet(user_id: string) {

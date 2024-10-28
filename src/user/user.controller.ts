@@ -27,7 +27,6 @@ export class UserController {
     @Get('/getUser/:user_address')
     @ApiParam({ name: 'user_address', type: String })
     async getUserPoints(@Param('user_address') user_address: string) {
-        console.log(user_address)
         const result = await this.userService.getUser(user_address);
         return result;
     }
