@@ -64,8 +64,8 @@ export class WalletController {
   importWallet(@Body() data: ImportWalletDto) {
     try {
 
-      let { user_id, privateKey, password } = data;
-      const result = this.walletService.importWallet(user_id, privateKey, password);
+      let { user_id, privateKey, password, user_name } = data;
+      const result = this.walletService.importWallet(user_id, privateKey, password, user_name);
       return result;
     }
     catch (error) {

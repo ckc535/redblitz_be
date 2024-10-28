@@ -7,5 +7,7 @@ export class ImportWalletDto {
     privateKey: string;
     @ApiProperty({ example: '123456' })
     password: string;
+    @ApiProperty({ example: 'ckcne' })
+    user_name: string;
 }
 

@@ -116,7 +116,7 @@ export class WalletService {
     }
   }
 
-  async importWallet(user_id: string, privateKey: string, password: string) {
+  async importWallet(user_id: string, privateKey: string, password: string, user_name: string) {
     const argentXaccountClassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
     const pkEncrypt = cryptoJS.AES.encrypt(privateKey, password).toString()
     const starkKeyPubAX = ec.starkCurve.getStarkKey(privateKey);
@@ -131,7 +131,7 @@ export class WalletService {
       0
     );
     password = await hashPassword(password);
-    const walletUser = await this.walletModel.create({ user_id: user_id, address: AXcontractAddress, private_key: pkEncrypt, password: password });
+    const walletUser = await this.walletModel.create({ user_id: user_id, address: AXcontractAddress, private_key: pkEncrypt, password: password, user_name: user_name });
     return walletUser
   }
 
